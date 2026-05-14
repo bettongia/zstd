@@ -1,0 +1,35 @@
+name: betto_zstd
+description: Zstd compression
+version: 0.1.0
+repository: https://github.com/bettongia/zstd
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+# Add regular dependencies here.
+dependencies:
+  code_assets: any
+  hooks: any
+  logging: any
+  ffi: ^2.1.4
+  native_toolchain_c: ^0.17.6
+  collection: ^1.19.1
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.30.0
+  ffigen: any
+
+ffigen:
+  name: Zstd
+  description: zstd compression
+  output: "lib/src/third_party/zstd.dart"
+
+  headers:
+    entry-points:
+      - "third_party/zstd/zstd.h"
+
+  functions:
+    include:
+      ["ZSTD_compress", "ZSTD_decompress", "ZSTD_minCLevel", "ZSTD_maxCLevel"]
