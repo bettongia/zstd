@@ -5,7 +5,7 @@ repository: https://github.com/bettongia/zstd
 publish_to: none
 
 environment:
-  sdk: ^3.10.0
+  sdk: ^3.12.0
 
 # Add regular dependencies here.
 dependencies:
