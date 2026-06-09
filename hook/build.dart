@@ -34,6 +34,12 @@ void main(List<String> args) async {
       assetName: 'src/zstd_native.dart',
       sources: ['third_party/zstd/src/zstd.c'],
       linkModePreference: LinkModePreference.dynamic,
+      // On Windows/MSVC, ZSTDLIB_API only emits __declspec(dllexport) when
+      // ZSTD_DLL_EXPORT=1 is defined. Without it the symbols are omitted from
+      // the import table and the FFI resolver throws error 127 at runtime.
+      defines: {
+        if (input.config.code.targetOS == OS.windows) 'ZSTD_DLL_EXPORT': '1',
+      },
     );
     await cBuilder.run(
       input: input,
