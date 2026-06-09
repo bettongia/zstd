@@ -8,3 +8,7 @@ pubspec.lock
 
 doc/
 coverage/
+
+# Claude Code — keep shared settings trackable but exclude personal/generated content
+.claude/settings.local.json
+.claude/agent-memory/
