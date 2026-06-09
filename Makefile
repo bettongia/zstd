@@ -29,6 +29,9 @@ cicd: prepare license_check format analyze test coverage
 cicd_macos: prepare test
 .PHONY: cicd_macos
 
+cicd_windows: prepare test
+.PHONY: cicd_windows
+
 web_test: prepare
 	dart test --platform chrome
 .PHONY: web_test

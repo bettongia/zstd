@@ -1,0 +1,24 @@
+name: betto_zstd_test_app
+description: Integration test app for betto_zstd — verifies native compilation on Android and iOS.
+publish_to: none
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  betto_zstd:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

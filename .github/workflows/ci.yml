@@ -45,6 +45,63 @@ jobs:
 
       - run: make cicd_macos
 
+  # ---------- Windows: native tests via MSVC ----------
+  test-windows:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - run: make cicd_windows
+
+  # ---------- Android: cross-compile via Flutter + NDK ----------
+  test-android:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Set up Android SDK / NDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        run: sdkmanager "ndk;27.0.12077973"
+
+      - name: flutter pub get
+        working-directory: integration_test_app
+        run: flutter pub get
+
+      - name: Build APK (arm64)
+        working-directory: integration_test_app
+        run: flutter build apk --target-platform android-arm64 --no-pub
+
+  # ---------- iOS: cross-compile via Flutter + Xcode ----------
+  test-ios:
+    runs-on: macos-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: flutter pub get
+        working-directory: integration_test_app
+        run: flutter pub get
+
+      - name: Build iOS (no code signing)
+        working-directory: integration_test_app
+        run: flutter build ios --no-codesign --no-pub
+
   # ---------- Web: WASM via Chrome ----------
   # Requires lib/assets/zstd.wasm to be committed.  Build it locally with
   # `make wasm` (needs Emscripten) and commit the result.

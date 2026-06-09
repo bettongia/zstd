@@ -9,9 +9,9 @@ compatibility is guaranteed by construction.
 
 | Platform | Implementation | Status |
 |---|---|---|
-| macOS, Linux, Windows | Native FFI (`native_toolchain_c`) | Supported |
-| iOS, Android | Native FFI (`native_toolchain_c`) | Supported |
-| Web (Flutter Web) | Emscripten WASM (`dart:js_interop`) | Supported |
+| macOS, Linux, Windows | Native FFI (`native_toolchain_c`) | Compress + decompress |
+| iOS, Android | Native FFI (`native_toolchain_c`) | Compress + decompress |
+| Web (Flutter Web) | Emscripten WASM (`dart:js_interop`) | Compress + decompress |
 
 ## Getting started
 
@@ -25,7 +25,7 @@ dependencies:
 ```
 
 **Native platforms** require a C compiler available at build time (e.g. `clang`
-on macOS/iOS, `gcc` on Linux/Android, MSVC or MinGW on Windows). The
+on macOS/iOS, `gcc` on Linux/Android, MSVC on Windows). The
 `native_toolchain_c` build hook compiles `zstd.c` automatically during
 `dart build` / `flutter build`.
 
@@ -71,6 +71,12 @@ Future<void> main() async {
 
 `ZstdSimple.compress` and `ZstdSimple.decompress` are then synchronous and
 safe to call from any context.
+
+Frames produced by the web path are byte-compatible with the native FFI path
+and vice versa — both compile the same `third_party/zstd/src/zstd.c` source, so
+the Zstd frame format is identical by construction. This is verified by
+`test/frame_compat_test.dart`, which runs a golden-file cross-platform check on
+every CI run.
 
 ### Compression levels
 
