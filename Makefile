@@ -18,13 +18,18 @@ all: license_check format analyze test coverage doc
 pre_commit: license_check test
 .PHONY: pre_commit
 
-cicd: license_check format analyze test coverage
+prepare:
+	dart pub global activate coverage
+	dart pub get
+.PHONY: prepare
+
+cicd: prepare license_check format analyze test coverage
 .PHONY: cicd
 
-cicd_macos: test
+cicd_macos: prepare test
 .PHONY: cicd_macos
 
-web_test:
+web_test: prepare
 	dart test --platform chrome
 .PHONY: web_test
 
