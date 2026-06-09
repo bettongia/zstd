@@ -1,6 +1,6 @@
 # betto_zstd: Web/WASM support and multi-platform pipeline
 
-**Status**: Investigated
+**Status**: Implementing
 
 **PR link**: —
 
