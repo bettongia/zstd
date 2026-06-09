@@ -8,6 +8,10 @@ topics:
   - compression
   - zstd
 
+flutter:
+  assets:
+    - lib/assets/zstd.wasm
+
 environment:
   sdk: ^3.12.0
 

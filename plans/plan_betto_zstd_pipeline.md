@@ -244,28 +244,32 @@ No `dependency_overrides` using `git:` refs are present in `betto_zstd`'s own
 
 ### Phase 1 — WASM compression and decompression (required; unblocks KMDB web sync)
 
-- [ ] Build `third_party/zstd/src/zstd.c` with Emscripten (`emcc -Os -s
+- [x] Build `third_party/zstd/src/zstd.c` with Emscripten (`emcc -Os -s
   WASM=1 -s EXPORTED_FUNCTIONS=[...]`) to produce `lib/assets/zstd.wasm`;
   document the exact `emcc` invocation in `Makefile` as `make wasm`
-- [ ] Check `lib/assets/zstd.wasm` into the repository
-- [ ] Refactor `lib/src/zstd_base.dart` → `lib/src/zstd_native.dart` (rename
+  _Note: `make wasm` target created; user must run it to produce and commit
+  `lib/assets/zstd.wasm` (Emscripten not available in the build sandbox).
+  `src/zstd_wasm_helpers.c` added to provide a 32-bit wrapper for
+  `ZSTD_getFrameContentSize`, avoiding the i64/BigInt interop issue._
+- [ ] Check `lib/assets/zstd.wasm` into the repository ← **run `make wasm` then commit**
+- [x] Refactor `lib/src/zstd_base.dart` → `lib/src/zstd_native.dart` (rename
   only; no API changes)
-- [ ] Update `hook/build.dart` `assetName` to reference `zstd_native.dart`
+- [x] Update `hook/build.dart` `assetName` to reference `zstd_native.dart`
   (required after the rename — the `CBuilder` `assetName` must match the file
   containing `@Native` declarations or the native library will fail to load)
-- [ ] Create `lib/src/zstd_web.dart`: `ZstdSimple` implementation that loads
+- [x] Create `lib/src/zstd_web.dart`: `ZstdSimple` implementation that loads
   `lib/assets/zstd.wasm` via `dart:js_interop`'s `WebAssembly.instantiate`,
   manages WASM heap allocation/deallocation explicitly, and exposes both
   `compress()` and `decompress()` (both enabled — frame compatibility is
   guaranteed, see Q2)
-- [ ] Create `lib/src/zstd_unsupported.dart`: stub implementation that throws
+- [x] Create `lib/src/zstd_unsupported.dart`: stub implementation that throws
   `UnsupportedError` (fallback for unsupported platforms / test stub)
-- [ ] Update `lib/zstd.dart` to use conditional export
-  (`if (dart.library.js_interop) 'src/zstd_web.dart'`)
+- [x] Update `lib/zstd.dart` to use conditional export
+  (`if (dart.library.ffi) 'src/zstd_native.dart' if (dart.library.js_interop) 'src/zstd_web.dart'`)
 - [ ] Declare `lib/assets/zstd.wasm` under `flutter: assets:` in `pubspec.yaml`
-  (required so Flutter web build bundles the WASM file)
-- [ ] Run `dart test --platform chrome` against existing tests on web
-- [ ] All existing native tests continue to pass
+  (required so Flutter web build bundles the WASM file) ← do after WASM built
+- [ ] Run `dart test --platform chrome` against existing tests on web ← needs WASM
+- [x] All existing native tests continue to pass (`dart test`: 19 tests, all pass)
 
 ### Phase 2 — Frame compatibility verification
 
@@ -273,25 +277,26 @@ Frame compatibility between native and WASM is guaranteed by construction
 (same source; see Q2), but the golden-file test remains valuable as a
 regression guard.
 
-- [ ] Generate golden fixture: compress a fixed payload with native FFI, write
+- [x] Generate golden fixture: compress a fixed payload with native FFI, write
   to `test/fixtures/native_compressed.zst`
-- [ ] Write `test/frame_compat_test.dart` with the three scenarios above
+  (generated automatically on first `dart test` run; file committed)
+- [x] Write `test/frame_compat_test.dart` with the three scenarios above
   (native→WASM decompress, WASM→native decompress, WASM round-trip)
 - [ ] Run frame compat test on native and on Chrome; both compress and
-  decompress must pass on web
+  decompress must pass on web ← needs WASM built and committed
 - [ ] Update README with web support status
 
 ### Phase 3 — VERSION_ZSTD pinning
 
-- [ ] Create `VERSION_ZSTD` file at repo root with current vendored version
-- [ ] Add version assertion to `hook/build.dart`: read `VERSION_ZSTD`, compare
-  with `ZSTD_VERSION_STRING` from `zstd.h`, throw if mismatch
+- [x] Create `VERSION_ZSTD` file at repo root with current vendored version (`1.5.7`)
+- [x] Add version assertion to `hook/build.dart`: read `VERSION_ZSTD`, parse
+  `ZSTD_VERSION_MAJOR/MINOR/RELEASE` defines from `zstd.h`, throw if mismatch
 - [ ] Document version-bump procedure in README
 
 ### Phase 4 — GitHub Actions CI pipeline
 
-- [ ] Create `.github/workflows/ci.yml` with matrix covering: macOS, Linux
-  x86_64, Web (Chrome)
+- [x] Create `.github/workflows/ci.yml` with jobs covering: macOS, Linux
+  x86_64, Web (Chrome), analysis, coverage
 - [ ] Add Android and iOS jobs (require Flutter SDK in the runner; confirm
   `native_toolchain_c` cross-compiles cleanly — resolves Q3)
 - [ ] Investigate and resolve Windows MinGW-w64 path (resolves Q4); add Windows

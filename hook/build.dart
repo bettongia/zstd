@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:io';
+
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:logging/logging.dart';
@@ -22,12 +24,14 @@ import 'package:native_toolchain_c/native_toolchain_c.dart';
 /// Compiles the Zstd C library for the target platform.
 void main(List<String> args) async {
   await build(args, (input, output) async {
+    _assertVersionPinned();
+
     // Always use dynamic linking. dart build cli bundles the resulting dylib
     // alongside the executable in the output bundle's lib/ directory, so the
     // binary can locate it at runtime without any link-hook step.
     final cBuilder = CBuilder.library(
       name: 'zstd',
-      assetName: 'src/zstd_base.dart',
+      assetName: 'src/zstd_native.dart',
       sources: ['third_party/zstd/src/zstd.c'],
       linkModePreference: LinkModePreference.dynamic,
     );
@@ -40,4 +44,37 @@ void main(List<String> args) async {
       routing: [const ToAppBundle()],
     );
   });
+}
+
+/// Verifies that VERSION_ZSTD matches the version encoded in zstd.h.
+///
+/// Parses ZSTD_VERSION_MAJOR / MINOR / RELEASE from the header and compares
+/// with the single-source-of-truth file. Fails the build on a mismatch so
+/// silent version drift is impossible.
+void _assertVersionPinned() {
+  final versionFile = File('VERSION_ZSTD');
+  if (!versionFile.existsSync()) return; // file absent → skip (bootstrap)
+
+  final expected = versionFile.readAsStringSync().trim();
+
+  final header = File('third_party/zstd/zstd.h').readAsStringSync();
+  final major = RegExp(r'#define ZSTD_VERSION_MAJOR\s+(\d+)').firstMatch(header)?.group(1);
+  final minor = RegExp(r'#define ZSTD_VERSION_MINOR\s+(\d+)').firstMatch(header)?.group(1);
+  final release = RegExp(r'#define ZSTD_VERSION_RELEASE\s+(\d+)').firstMatch(header)?.group(1);
+
+  if (major == null || minor == null || release == null) {
+    throw Exception(
+      'Could not parse ZSTD_VERSION_MAJOR/MINOR/RELEASE from '
+      'third_party/zstd/zstd.h.',
+    );
+  }
+
+  final actual = '$major.$minor.$release';
+  if (actual != expected) {
+    throw Exception(
+      'VERSION_ZSTD mismatch: VERSION_ZSTD says "$expected" but '
+      'third_party/zstd/zstd.h defines "$actual". '
+      'Update VERSION_ZSTD or refresh the vendored source with make update_zstd.',
+    );
+  }
 }

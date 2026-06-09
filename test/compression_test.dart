@@ -21,6 +21,9 @@ void main() {
   group('ZstdSimple', () {
     late ZstdSimple zstd;
 
+    // On web: loads the WASM module. On native: no-op.
+    setUpAll(() => ZstdSimple.init());
+
     setUp(() {
       zstd = ZstdSimple();
     });

@@ -84,6 +84,10 @@ class ZstdSimple {
   /// The output buffer length.
   final int outputBufferLength;
 
+  /// No-op on native platforms; exists so callers can always await
+  /// [ZstdSimple.init] without platform guards.
+  static Future<void> init() async {}
+
   /// Creates a new [ZstdSimple] instance with the given [level].
   ///
   /// Throws [ArgumentError] if the [level] is invalid.

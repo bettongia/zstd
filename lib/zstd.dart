@@ -15,8 +15,15 @@
 /// Zstd compression and decompression for Dart.
 ///
 /// This library provides a high-level API for using the Zstandard (Zstd)
-/// compression algorithm in Dart applications. It currently supports
-/// simple synchronous compression and decompression of byte arrays.
+/// compression algorithm in Dart applications.  It supports synchronous
+/// compression and decompression on native platforms (via FFI) and on the
+/// web (via an Emscripten-compiled WASM module).
+///
+/// On web, call [ZstdSimple.init] and await it before using any [ZstdSimple]
+/// instance.  On native platforms [ZstdSimple.init] is a no-op.
 library;
 
-export 'src/zstd_base.dart' show ZstdSimple, minCLevel, maxCLevel;
+export 'src/zstd_unsupported.dart'
+    if (dart.library.ffi) 'src/zstd_native.dart'
+    if (dart.library.js_interop) 'src/zstd_web.dart'
+    show ZstdSimple, minCLevel, maxCLevel;
