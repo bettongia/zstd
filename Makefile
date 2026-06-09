@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := default
 
 SOURCE_FILES=lib/**/*.dart
 TEST_FILES=test/**/*.dart
@@ -12,8 +12,8 @@ ADDLICENSE_CONFIG=addlicense_config.txt
 # original i64-returning function to avoid BigInt requirements in Dart/JS.
 WASM_EXPORTS = ['_ZSTD_compress','_ZSTD_decompress','_ZSTD_compressBound','_ZSTD_getFrameContentSize32','_ZSTD_isError','_ZSTD_minCLevel','_ZSTD_maxCLevel','_malloc','_free']
 
-all: license_check format analyze test coverage doc
-.PHONY: all
+default: license_check format analyze test coverage doc
+.PHONY: default
 
 pre_commit: license_check test
 .PHONY: pre_commit
@@ -35,6 +35,12 @@ cicd_windows: prepare test
 web_test: prepare
 	dart test --platform chrome
 .PHONY: web_test
+
+# START: Container tests
+container_test: purge
+	podman build -t betto-zstd-cicd .
+	podman run --rm betto-zstd-cicd
+# END: Container tests
 
 test:
 	dart test
@@ -64,6 +70,11 @@ license_add:
 doc:
 	dart doc --output=$(DOC_DIR) --validate-links .
 .PHONY: doc
+
+purge: clean
+	rm -rf .dart_tool
+	rm -rf integration_test_app/.dart_tool
+.PHONY: purge
 
 clean:
 	rm -rf $(DOC_DIR)
