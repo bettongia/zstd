@@ -9,7 +9,7 @@ export EMULATOR_IOS ?= ios-emulator
 export EMULATOR_IOS_DEVICE ?= iPhone\ 17
 export EMULATOR_IOS_RUNTIME ?= iOS26.5
 
-DOC_DIR=doc
+DOC_DIR=site/api
 COVERAGE_DIR=coverage
 ADDLICENSE_CONFIG=addlicense_config.txt
 
@@ -104,7 +104,7 @@ analyze:
 coverage:
 	dart run coverage:test_with_coverage --out $(COVERAGE_DIR)
 	lcov --remove $(COVERAGE_DIR)/lcov.info 'lib/src/third_party/*' -o $(COVERAGE_DIR)/lcov.info
-	genhtml $(COVERAGE_DIR)/lcov.info -o $(COVERAGE_DIR)/html
+	genhtml $(COVERAGE_DIR)/lcov.info -o site/coverage
 .PHONY: coverage
 
 license_check:
@@ -118,15 +118,35 @@ doc:
 	dart doc --output=$(DOC_DIR) --validate-links .
 .PHONY: doc
 
-purge: clean
-	rm -rf .dart_tool
-	rm -rf integration_test_app/.dart_tool
-.PHONY: purge
+# BEGIN: Documentation site tasks
+site/:
+	mkdir -p site
 
-clean:
-	rm -rf $(DOC_DIR)
-	rm -rf $(COVERAGE_DIR)
-.PHONY: clean
+site: styles site/index.html site/spec.html site/roadmap.html site/api/index.html coverage | site/
+.PHONY: site
+
+styles: site/styles/styles.css
+.PHONY: styles
+
+site/index.html:  docs/index.md README.md docs/.pandoc docs/template/header.html | site/
+	pandoc --defaults="docs/.pandoc" docs/index.md README.md -o "site/index.html";
+
+site/spec.html:  docs/spec/*.md docs/spec/.pandoc docs/template/header.html | site/
+	pandoc --defaults="docs/spec/.pandoc" --mathml docs/spec/*.md -o "site/spec.html";
+
+site/roadmap.html: docs/roadmap/*.md docs/.pandoc docs/template/header.html | site/
+	pandoc --defaults="docs/.pandoc" docs/roadmap/v*.md -o "site/roadmap.html";
+
+site/styles/styles.css: docs/styles/styles.css | site/
+	mkdir -p site/styles/
+	cp docs/styles/styles.css site/styles/styles.css
+
+site/api/index.html:
+	dart doc -o site/api/index.html
+
+# END: Documentation site tasks
+
+
 
 # Build the Zstd WASM module from source using Emscripten.
 #
@@ -156,3 +176,13 @@ wasm: third_party/zstd/src/zstd.c src/zstd_wasm_helpers.c
 	  third_party/zstd/src/zstd.c src/zstd_wasm_helpers.c \
 	  -o lib/assets/zstd.wasm
 .PHONY: wasm
+
+purge: clean
+	rm -rf .dart_tool
+	rm -rf integration_test_app/.dart_tool
+.PHONY: purge
+
+clean:
+	rm -rf site
+	rm -rf $(COVERAGE_DIR)
+.PHONY: clean

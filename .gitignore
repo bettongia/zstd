@@ -12,3 +12,6 @@ coverage/
 # Claude Code — keep shared settings trackable but exclude personal/generated content
 .claude/settings.local.json
 .claude/agent-memory/
+api-docs/
+site/
+.claude/settings.json
