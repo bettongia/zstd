@@ -78,7 +78,7 @@ class ZstdSimple {
 
   /// No-op on native platforms; exists so callers can always await
   /// [ZstdSimple.init] without platform guards.
-  static Future<void> init() async {}
+  static Future<void> init({String? wasmUrl}) async {}
 
   /// Creates a new [ZstdSimple] instance with the given [level].
   ///

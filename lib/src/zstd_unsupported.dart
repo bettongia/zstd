@@ -33,7 +33,7 @@ class ZstdSimple {
   }
 
   /// Throws [UnsupportedError].
-  static Future<void> init() => throw UnsupportedError(_msg);
+  static Future<void> init({String? wasmUrl}) => throw UnsupportedError(_msg);
 
   /// Throws [UnsupportedError].
   String get version => throw UnsupportedError(_msg);
