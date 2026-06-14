@@ -19,7 +19,7 @@ make all          # license_check + format + analyze + test + coverage + doc
 make pre_commit   # license_check + test (run before committing)
 make web_test     # run tests on Chrome (sets up coverage tool first)
 make wasm         # rebuild lib/assets/zstd.wasm (requires Emscripten/emcc)
-make coverage     # generate HTML coverage report in coverage/html/
+make coverage     # generate HTML coverage report in site/coverage/
 make doc          # generate API docs in doc/
 make license_add  # add missing Apache 2.0 headers
 ```
@@ -54,4 +54,4 @@ All `.dart` files (except `analysis_options.yaml`, `pubspec.yaml`, `third_party/
 
 ## Active plan
 
-No active plan. `plans/completed/` holds the completed pipeline and Windows build plans. `plans/plan_betto_zstd_vendor_automation.md` (Q6 from the pipeline plan) tracks the deferred `make update_zstd` automation work.
+No active plan. `docs/plans/completed/` holds the completed pipeline and Windows build plans. `docs/plans/plan_betto_zstd_vendor_automation.md` (Q6 from the pipeline plan) tracks the deferred `make update_zstd` automation work.

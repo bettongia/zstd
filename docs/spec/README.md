@@ -50,8 +50,11 @@ dependency; the Dart library itself uses only Dart SDK libraries.
 betto_zstd/
 ├── bin/
 │   └── dartz.dart                  # CLI tool: compress / decompress files
+├── docs/
+│   ├── plans/                      # Implementation plans (active and completed)
+│   └── spec/                       # This specification document
 ├── example/
-│   └── basic.dart                  # Minimal usage example
+│   └── main.dart                   # Minimal usage example
 ├── hook/
 │   └── build.dart                  # Native Assets build hook
 ├── lib/
@@ -335,7 +338,7 @@ compiled into `zstd.h` at every build.
 7. Commit all changed files including the updated `zstd.wasm`.
 
 The deferred `make update_zstd` automation (which would script steps 1–4) is
-tracked in `plans/plan_betto_zstd_vendor_automation.md`.
+tracked in `docs/plans/plan_betto_zstd_vendor_automation.md`.
 
 ---
 
@@ -349,6 +352,7 @@ Run on both the native VM and Chrome. Tests cover:
 - Empty input and single-byte round-trips.
 - Invalid compression level → `ArgumentError`.
 - Decompressing invalid/truncated data → `Exception`.
+- Decompressing a frame with unknown content size (no FCS field) → `Exception`.
 - Highly compressible data produces smaller output than input.
 - Return type is `Uint8List`.
 
