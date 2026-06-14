@@ -388,13 +388,17 @@ The golden fixture file is committed to the repository.
 
 ## Integration Tests (`integration_test_app/`)
 
-A minimal Flutter application used exclusively as a test harness for iOS and
-Android CI. It does not ship as a user-facing app. Tests exercise the native FFI
-path on a real device/emulator:
+A minimal Flutter application used as a test harness for iOS and Android. It
+does not ship as a user-facing app. Tests exercise the native FFI path on a real
+device/emulator:
 
 - Round-trip compress/decompress with level 3.
 - Empty input round-trip.
 - Compression level bounds (`minCLevel()` < 0, `maxCLevel()` > 0).
+
+These tests are run locally via `make android_test` (connected Android
+emulator/device) and `make ios_test` (connected iOS simulator/device).
+Automated CI coverage for iOS and Android is deferred to a post-0.1.0 release.
 
 ## Running Tests
 
