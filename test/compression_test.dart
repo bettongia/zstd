@@ -97,6 +97,19 @@ void main() {
       expect(() => zstd.decompress(truncated), throwsException);
     });
 
+    test('frame with unknown content size throws Exception', () {
+      // A minimal valid zstd frame whose header has FCS_Flag=0 and SSF=0,
+      // so ZSTD_getFrameContentSize returns ZSTD_CONTENTSIZE_UNKNOWN (-1).
+      // Layout: magic(4) + FHD(1) + Window_Descriptor(1) + last-empty-raw-block(3)
+      final frame = Uint8List.fromList([
+        0x28, 0xB5, 0x2F, 0xFD, // zstd magic
+        0x00, // FHD: FCS_Flag=0, Single_Segment_Flag=0
+        0x00, // Window_Descriptor (1 KB window)
+        0x01, 0x00, 0x00, // last empty raw block
+      ]);
+      expect(() => zstd.decompress(frame), throwsException);
+    });
+
     test('single byte round-trip', () {
       final original = Uint8List.fromList([0x42]);
       final decompressed = zstd.decompress(zstd.compress(original));

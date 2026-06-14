@@ -10,4 +10,5 @@
 --ignore="lib/src/third_party/zstd.dart"
 --ignore=".github/**"
 --ignore="integration_test_app/**"
+--ignore="docs/template/**"
 .
