@@ -11,4 +11,5 @@
 --ignore=".github/**"
 --ignore="integration_test_app/**"
 --ignore="docs/template/**"
+--ignore="site/**"
 .
