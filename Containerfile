@@ -12,7 +12,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     clang libclang-dev \
     lcov \
     chromium \
+    git \
+    python3 \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Emscripten SDK at the pinned version (EMSCRIPTEN_VERSION file at repo root)
+COPY EMSCRIPTEN_VERSION /tmp/EMSCRIPTEN_VERSION
+ENV EMSDK=/emsdk
+RUN git clone https://github.com/emscripten-core/emsdk.git $EMSDK && \
+    version=$(cat /tmp/EMSCRIPTEN_VERSION) && \
+    $EMSDK/emsdk install "$version" && \
+    $EMSDK/emsdk activate "$version" --embedded
+ENV PATH="/emsdk/upstream/emscripten:${PATH}"
 
 RUN useradd --create-home --shell /bin/sh runner
 
