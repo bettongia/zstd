@@ -153,6 +153,11 @@ site/api/index.html:
 # Prerequisites: emcc must be on PATH (install via emsdk).
 #   https://emscripten.org/docs/getting_started/downloads.html
 #
+# The pinned Emscripten version is recorded in EMSCRIPTEN_VERSION at the
+# repository root (analogous to VERSION_ZSTD for the native C library).
+# Use that exact version to ensure bit-for-bit reproducibility with the
+# committed binary and with the CI verify-wasm job.
+#
 # Output: lib/assets/zstd.wasm — check this file in after running make wasm.
 #
 # Flags:

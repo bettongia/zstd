@@ -120,14 +120,41 @@ on a mismatch.
 
 ### Rebuilding the WASM module
 
-Requires [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
-(`emcc` on PATH):
+The pinned Emscripten version is recorded in `EMSCRIPTEN_VERSION` at the
+repository root (analogous to `VERSION_ZSTD` for the C library). Always use
+that exact version so the rebuilt binary is bit-for-bit identical to the
+committed one and the CI `verify-wasm` job passes.
+
+#### Using the Containerfile (recommended)
+
+The `Containerfile` at the repository root installs the pinned Emscripten
+version automatically. This is the easiest way to build without polluting your
+host environment:
+
+```bash
+podman build -t betto-zstd-wasm .
+podman run --rm -v "$(pwd)":/work -w /work betto-zstd-wasm make wasm
+```
+
+Commit `lib/assets/zstd.wasm` after building.
+
+#### Using a local Emscripten install
+
+Install the exact version from `EMSCRIPTEN_VERSION` via
+[emsdk](https://emscripten.org/docs/getting_started/downloads.html), activate
+it so `emcc` is on `PATH`, then run:
 
 ```bash
 make wasm
 ```
 
 Output: `lib/assets/zstd.wasm` (~317 KB). Commit this file after building.
+
+#### Upgrading the pinned Emscripten version
+
+1. Update `EMSCRIPTEN_VERSION` to the new tagged release (e.g. `6.1.0`).
+2. Rebuild the WASM module using the container or local workflow above.
+3. Commit both `EMSCRIPTEN_VERSION` and the new `lib/assets/zstd.wasm`.
 
 ## Development
 

@@ -41,6 +41,7 @@ dependency; the Dart library itself uses only Dart SDK libraries.
 | Dynamic linking only (native)          | `dart build` CLI bundles the resulting shared library in the output bundle's `lib/` directory; no pre-built binaries checked in            |
 | WASM checked in                        | The WASM binary (`lib/assets/zstd.wasm`) is committed so the web path works without Emscripten installed                                   |
 | Version pinning enforced at build time | `hook/build.dart` compares `VERSION_ZSTD` against the version macros in `third_party/zstd/zstd.h` and fails the build on a mismatch        |
+| WASM currency enforced in CI           | The `verify-wasm` CI job rebuilds `lib/assets/zstd.wasm` under the Emscripten version pinned in `EMSCRIPTEN_VERSION` and asserts the result is bit-for-bit identical to the committed binary, preventing the web path from drifting from the current C source |
 
 ---
 
@@ -418,12 +419,13 @@ The Makefile is the primary interface for running tests. Do not invoke
 
 The pipeline runs on every push and pull request to `main`.
 
-| Job            | Runner           | Trigger       | Steps                                                              |
-| -------------- | ---------------- | ------------- | ------------------------------------------------------------------ |
-| `build`        | `ubuntu-latest`  | always        | `make cicd` — license check, format, analyze, unit tests, coverage |
-| `test-macos`   | `macos-latest`   | after `build` | `make cicd_macos` — native unit tests on Apple Silicon/x86_64      |
-| `test-windows` | `windows-latest` | after `build` | `make cicd_windows` — native unit tests via MSVC                   |
-| `test-web`     | `ubuntu-latest`  | after `build` | `make web_test` — WASM tests on Chrome                             |
+| Job            | Runner           | Trigger                       | Steps                                                                                                         |
+| -------------- | ---------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `build`        | `ubuntu-latest`  | always                        | `make cicd` — license check, format, analyze, unit tests, coverage                                            |
+| `test-macos`   | `macos-latest`   | after `build`                 | `make cicd_macos` — native unit tests on Apple Silicon/x86_64                                                 |
+| `test-windows` | `windows-latest` | after `build`                 | `make cicd_windows` — native unit tests via MSVC                                                              |
+| `verify-wasm`  | `ubuntu-latest`  | after `build`                 | Rebuilds `lib/assets/zstd.wasm` under the pinned Emscripten version and asserts `git diff --exit-code` is clean |
+| `test-web`     | `ubuntu-latest`  | after `build` + `verify-wasm` | `make web_test` — WASM tests on Chrome; only runs after the binary is proven current                          |
 
 Coverage is uploaded as an artifact (`coverage/lcov.info`) from the `build` job.
 

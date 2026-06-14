@@ -1,6 +1,6 @@
 # betto_zstd: WASM CI freshness check
 
-**Status**: Investigated
+**Status**: Complete
 
 **PR link**: —
 
@@ -139,26 +139,26 @@ Prerequisites already done as part of investigation:
 
 Remaining steps:
 
-1. **Update `Makefile` `wasm:` comment** — add a note referencing
+- [x] 1. **Update `Makefile` `wasm:` comment** — add a note referencing
    `EMSCRIPTEN_VERSION` so developers know where the pin lives, consistent with
    the `VERSION_ZSTD` documentation pattern.
 
-2. **Update `README.md` "Rebuilding the WASM module" section** — document
+- [x] 2. **Update `README.md` "Rebuilding the WASM module" section** — document
    `EMSCRIPTEN_VERSION`, the `Containerfile`-based local workflow, and how to
    upgrade the pin (bump `EMSCRIPTEN_VERSION`, rebuild in container, commit new
    binary). Addresses release-review N8.
 
-3. **Add `verify-wasm` job to `.github/workflows/ci.yml`** — on
+- [x] 3. **Add `verify-wasm` job to `.github/workflows/ci.yml`** — on
    `ubuntu-latest`, with `needs: build`. Steps:
    a. `actions/checkout`
    b. `mymindstorm/setup-emscripten` pinned to `$(cat EMSCRIPTEN_VERSION)`
    c. `make wasm`
    d. `git diff --exit-code lib/assets/zstd.wasm`
 
-4. **Update `test-web` job** — add `verify-wasm` to its `needs:` list so it
+- [x] 4. **Update `test-web` job** — add `verify-wasm` to its `needs:` list so it
    only runs after the binary has been proven current.
 
-5. **Update `docs/spec/README.md`** — add a one-line note documenting the WASM
+- [x] 5. **Update `docs/spec/README.md`** — add a one-line note documenting the WASM
    CI guard alongside the existing note about the native `_assertVersionPinned`
    guard, so the two paths are documented symmetrically.
 
@@ -288,4 +288,9 @@ Resolve the two questions below and it can move to Investigated.
 
 ## Summary
 
-_To be completed after implementation._
+- Added `verify-wasm` job to `.github/workflows/ci.yml` that runs on `ubuntu-latest` after `build`, installs the pinned Emscripten version from `EMSCRIPTEN_VERSION`, rebuilds `lib/assets/zstd.wasm` with `make wasm`, and asserts `git diff --exit-code lib/assets/zstd.wasm` — failing CI if the committed binary is stale.
+- Updated `test-web` job `needs:` from `[build]` to `[build, verify-wasm]` so Chrome/WASM tests only run after the binary has been proven current.
+- Updated the `Makefile` `wasm:` comment to reference `EMSCRIPTEN_VERSION` as the single source of truth for the pinned Emscripten version, consistent with the `VERSION_ZSTD` documentation pattern.
+- Expanded `README.md` "Rebuilding the WASM module" section to document `EMSCRIPTEN_VERSION`, the `Containerfile`-based local workflow (recommended), and the upgrade procedure (bump `EMSCRIPTEN_VERSION`, rebuild, commit both files); addresses release-review N8.
+- Added two notes to `docs/spec/README.md`: a new row in the Design Constraints table documenting the WASM CI guard symmetrically with the native `_assertVersionPinned` guard, and a new `verify-wasm` row in the CI/CD Pipeline table.
+- No deviations from the plan. Prerequisites (`EMSCRIPTEN_VERSION` file, updated `Containerfile`, new baseline WASM binary built under Emscripten 6.0.0) were already completed as part of the investigation phase.
