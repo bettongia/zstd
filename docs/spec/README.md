@@ -91,7 +91,7 @@ betto_zstd/
 
 # Public API
 
-The public surface is exported from `lib/zstd.dart` and consists of three
+The public surface is exported from `lib/zstd.dart` and consists of four
 symbols:
 
 ## `ZstdSimple`
@@ -100,15 +100,13 @@ A synchronous compress/decompress interface over `Uint8List`.
 
 ```dart
 class ZstdSimple {
-  ZstdSimple({
-    int level = defaultLevel,       // default: ZSTD_CLEVEL_DEFAULT (3)
-    int inputBufferLength = maxInputBufferLength,
-    int outputBufferLength = -1,    // reserved; unused in current implementation
-  });
+  ZstdSimple({int level = 3});  // level defaults to ZSTD_CLEVEL_DEFAULT
 
-  static Future<void> init({String wasmUrl = '...'});  // no-op on native
+  static Future<void> init();   // web: loads WASM; native: no-op
+  // On web only, init() also accepts an optional wasmUrl parameter:
+  // static Future<void> init({String wasmUrl = '<flutter-asset-path>'});
 
-  String get version;              // Zstd library version string
+  String get version;           // Zstd library version string
   Uint8List compress(List<int> data);
   Uint8List decompress(List<int> data);
 }
@@ -116,7 +114,9 @@ class ZstdSimple {
 
 **`init()`** must be awaited once before any use on the web platform (it loads
 the WASM module). On native platforms it is a synchronous no-op, but callers
-should always await it so the same call site works on all platforms.
+should always await it so the same call site works on all platforms. The
+optional `wasmUrl` parameter is web-only; it overrides the default Flutter
+asset path and is not available on native or unsupported-platform builds.
 
 **`compress()`** allocates the output buffer using `ZSTD_compressBound`,
 performs a single-shot compression, and returns the compressed bytes trimmed to
@@ -126,6 +126,19 @@ the actual compressed size.
 (`ZSTD_getFrameContentSize`), allocates the exact output buffer, decompresses,
 and returns the result. It throws if the frame header is invalid or the content
 size is unknown (streaming frames are not supported).
+
+## `ZstdException`
+
+Thrown by `compress` and `decompress` when the Zstd library reports an error
+or the frame header is invalid. Implements `Exception`, so it is caught by
+both `on ZstdException` and `on Exception` clauses.
+
+```dart
+class ZstdException implements Exception {
+  final String message;
+  const ZstdException(this.message);
+}
+```
 
 ## `minCLevel()` / `maxCLevel()`
 
@@ -491,8 +504,8 @@ Apache 2.0 header. The `addlicense` tool is configured via
 | Scenario                                              | Behaviour                                               |
 | ----------------------------------------------------- | ------------------------------------------------------- |
 | Invalid compression level at construction             | `ArgumentError`                                         |
-| Zstd reports a compression or decompression error     | `Exception` with the Zstd error name                    |
-| Frame header is invalid or content size is unknown    | `Exception` with a descriptive message                  |
+| Zstd reports a compression or decompression error     | `ZstdException` with the Zstd error name                |
+| Frame header is invalid or content size is unknown    | `ZstdException` with a descriptive message              |
 | `compress`/`decompress` called before `init()` on web | `StateError`                                            |
 | Platform not supported                                | `UnsupportedError` (from stub)                          |
 | `VERSION_ZSTD` mismatch at build time                 | Build fails with an `Exception` describing the mismatch |

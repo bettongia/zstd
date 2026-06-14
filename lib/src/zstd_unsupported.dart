@@ -28,11 +28,7 @@ int maxCLevel() => throw UnsupportedError(_msg);
 /// Stub implementation of [ZstdSimple] for unsupported platforms.
 class ZstdSimple {
   /// Throws [UnsupportedError] unconditionally.
-  ZstdSimple({
-    int level = 3,
-    int inputBufferLength = 0,
-    int outputBufferLength = -1,
-  }) {
+  ZstdSimple({int level = 3}) {
     throw UnsupportedError(_msg);
   }
 

@@ -23,6 +23,7 @@
 /// instance.  On native platforms [ZstdSimple.init] is a no-op.
 library;
 
+export 'src/zstd_exception.dart' show ZstdException;
 export 'src/zstd_unsupported.dart'
     if (dart.library.ffi) 'src/zstd_native.dart'
     if (dart.library.js_interop) 'src/zstd_web.dart'

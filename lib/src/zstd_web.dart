@@ -25,13 +25,12 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
+import 'zstd_exception.dart';
+
 // Zstd level bounds — fixed by the Zstd specification, match the compiled WASM.
 const int _kMinCLevel = -131072;
 const int _kMaxCLevel = 22;
 const int _kDefaultLevel = 3;
-
-// ZSTD_BLOCKSIZE_MAX = 131072 * 31; retained for API parity with native impl.
-const int _kMaxInputBufferLength = 4064256;
 
 // Zstd version matching third_party/zstd/zstd.h (MAJOR.MINOR.RELEASE).
 const String _kVersion = '1.5.7';
@@ -133,20 +132,10 @@ class ZstdSimple {
   /// The compression level to use (default: 3).
   final int level;
 
-  /// The input buffer length (unused on web; retained for API parity).
-  final int inputBufferLength;
-
-  /// The output buffer length (unused on web; retained for API parity).
-  final int outputBufferLength;
-
   /// Creates a new [ZstdSimple] instance with the given [level].
   ///
   /// Throws [ArgumentError] if [level] is outside [minCLevel]..[maxCLevel].
-  ZstdSimple({
-    this.level = _kDefaultLevel,
-    this.inputBufferLength = _kMaxInputBufferLength,
-    this.outputBufferLength = -1,
-  }) {
+  ZstdSimple({this.level = _kDefaultLevel}) {
     if (level < _kMinCLevel || level > _kMaxCLevel) {
       throw ArgumentError.value(level, 'level', 'Invalid compression level');
     }
@@ -204,7 +193,7 @@ class ZstdSimple {
 
     final dstCapacity = e.zstdCompressBound(srcSize.toJS).toDartDouble.toInt();
     if (e.zstdIsError(dstCapacity.toJS).toDartDouble.toInt() != 0) {
-      throw Exception('Zstd compressBound failed (code $dstCapacity)');
+      throw ZstdException('compressBound failed (code $dstCapacity)');
     }
 
     final srcPtr = _malloc(srcSize);
@@ -226,7 +215,7 @@ class ZstdSimple {
             .toInt();
 
         if (e.zstdIsError(compressed.toJS).toDartDouble.toInt() != 0) {
-          throw Exception('Zstd compression error (code $compressed)');
+          throw ZstdException('compression error (code $compressed)');
         }
 
         // Re-fetch heap view: ALLOW_MEMORY_GROWTH may have replaced the buffer.
@@ -261,13 +250,12 @@ class ZstdSimple {
           .toInt();
 
       if (decompressedSize == -1) {
-        throw Exception(
-          'Zstd decompression error: Unknown content size. '
-          'Use streaming API.',
+        throw ZstdException(
+          'decompression error: unknown content size. Use streaming API.',
         );
       }
       if (decompressedSize == -2) {
-        throw Exception('Zstd decompression error: Invalid frame header.');
+        throw ZstdException('decompression error: invalid frame header.');
       }
 
       final dstPtr = _malloc(decompressedSize);
@@ -283,7 +271,7 @@ class ZstdSimple {
             .toInt();
 
         if (e.zstdIsError(resultSize.toJS).toDartDouble.toInt() != 0) {
-          throw Exception('Zstd decompression error (code $resultSize)');
+          throw ZstdException('decompression error (code $resultSize)');
         }
 
         return Uint8List.fromList(_heap().sublist(dstPtr, dstPtr + resultSize));

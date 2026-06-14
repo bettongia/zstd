@@ -18,12 +18,10 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 import 'third_party/zstd.dart';
+import 'zstd_exception.dart';
 
 /// Default compression level for Zstd.
 const int defaultLevel = ZSTD_CLEVEL_DEFAULT;
-
-/// Maximum input buffer length for Zstd.
-const int maxInputBufferLength = ZSTD_BLOCKSIZE_MAX;
 
 /// Version of the Zstd library being used.
 const String zStdVersion = ZSTD_VERSION_STRING;
@@ -78,12 +76,6 @@ class ZstdSimple {
   /// The compression level to use (default: [defaultLevel]).
   final int level;
 
-  /// The input buffer length.
-  final int inputBufferLength;
-
-  /// The output buffer length.
-  final int outputBufferLength;
-
   /// No-op on native platforms; exists so callers can always await
   /// [ZstdSimple.init] without platform guards.
   static Future<void> init() async {}
@@ -91,11 +83,7 @@ class ZstdSimple {
   /// Creates a new [ZstdSimple] instance with the given [level].
   ///
   /// Throws [ArgumentError] if the [level] is invalid.
-  ZstdSimple({
-    this.level = defaultLevel,
-    this.inputBufferLength = maxInputBufferLength,
-    this.outputBufferLength = -1,
-  }) {
+  ZstdSimple({this.level = defaultLevel}) {
     if (!_isValidCLevel(level)) {
       throw ArgumentError.value(level, 'level', 'Invalid compression level');
     }
@@ -117,7 +105,7 @@ class ZstdSimple {
 
     if (_isError(dstCapacity) != 0) {
       final errorName = _getErrorName(dstCapacity).toDartString();
-      throw Exception('Zstd compressBound error: $errorName');
+      throw ZstdException('compressBound error: $errorName');
     }
 
     final srcPtr = malloc<Uint8>(srcSize);
@@ -136,7 +124,7 @@ class ZstdSimple {
 
       if (_isError(compressedSize) != 0) {
         final errorName = _getErrorName(compressedSize).toDartString();
-        throw Exception('Zstd compression error: $errorName');
+        throw ZstdException('compression error: $errorName');
       }
 
       final result = Uint8List.fromList(dstPtr.asTypedList(compressedSize));
@@ -162,12 +150,12 @@ class ZstdSimple {
       );
 
       if (decompressedSize == -1) {
-        throw Exception(
-          'Zstd decompression error: Unknown content size. Use streaming API.',
+        throw ZstdException(
+          'decompression error: unknown content size. Use streaming API.',
         );
       }
       if (decompressedSize == -2) {
-        throw Exception('Zstd decompression error: Invalid frame header.');
+        throw ZstdException('decompression error: invalid frame header.');
       }
 
       final dstPtr = malloc<Uint8>(decompressedSize);
@@ -181,7 +169,7 @@ class ZstdSimple {
 
         if (_isError(resultSize) != 0) {
           final errorName = _getErrorName(resultSize).toDartString();
-          throw Exception('Zstd decompression error: $errorName');
+          throw ZstdException('decompression error: $errorName');
         }
 
         final result = Uint8List.fromList(dstPtr.asTypedList(resultSize));
