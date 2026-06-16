@@ -1,9 +1,6 @@
 # Flutter integration test harness — not needed by package consumers.
 integration_test_app/
 
-# WASM C helper source — the pre-built lib/assets/zstd.wasm is committed.
-/src/
-
 # Project documentation, plans, and reviews.
 docs/
 
@@ -17,6 +14,5 @@ coverage/
 # Development tooling config.
 cspell.json
 
-third_party/
 header_template.txt
 addlicense_config.txt

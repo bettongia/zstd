@@ -1,5 +1,7 @@
 ## 0.1.0-dev.3
 
+Minor fix to `.pubignore` as publishing needed the `third_party/` dir
+
 ## 0.1.0-dev.2
 
 Fixes to repair poor pub.dev score:
