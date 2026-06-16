@@ -2,7 +2,7 @@
 integration_test_app/
 
 # WASM C helper source — the pre-built lib/assets/zstd.wasm is committed.
-src/
+/src/
 
 # Project documentation, plans, and reviews.
 docs/
