@@ -131,7 +131,7 @@ jobs:
         with:
           sdk: stable
 
-      - uses: browser-actions/setup-chrome@v1
+      - uses: browser-actions/setup-chrome@v2
 
       - run: make web_test
         env:

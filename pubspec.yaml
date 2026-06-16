@@ -1,6 +1,6 @@
 name: betto_zstd
 description: Zstd compression
-version: 0.1.0-dev.1
+version: 0.1.0-dev.2
 repository: https://github.com/bettongia/zstd
 issue_tracker: https://github.com/bettongia/zstd/issues
 homepage: https://bettongia.github.io/zstd/
