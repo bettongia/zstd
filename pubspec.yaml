@@ -2,7 +2,7 @@ name: betto_zstd
 description:
   A Zstandard (Zstd) compression library for Dart. Supports native platforms via
   FFI and the web platform via an Emscripten-compiled WASM module.
-version: 0.1.0-dev.2
+version: 0.1.0-dev.3
 repository: https://github.com/bettongia/zstd
 issue_tracker: https://github.com/bettongia/zstd/issues
 homepage: https://bettongia.github.io/zstd/
