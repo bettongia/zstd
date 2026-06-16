@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := default
 
+include site.mk
+
 SOURCE_FILES=lib/**/*.dart
 TEST_FILES=test/**/*.dart
 
@@ -18,7 +20,7 @@ ADDLICENSE_CONFIG=addlicense_config.txt
 # original i64-returning function to avoid BigInt requirements in Dart/JS.
 WASM_EXPORTS = ['_ZSTD_compress','_ZSTD_decompress','_ZSTD_compressBound','_ZSTD_getFrameContentSize32','_ZSTD_isError','_ZSTD_minCLevel','_ZSTD_maxCLevel','_malloc','_free']
 
-default: license_check format analyze test coverage doc
+default: clean prepare license_check format analyze test coverage doc_site
 .PHONY: default
 
 pre_commit: license_check test
@@ -29,8 +31,11 @@ prepare:
 	dart pub get
 .PHONY: prepare
 
-cicd: prepare license_check format analyze test coverage
+cicd: default
 .PHONY: cicd
+
+container-cicd: clean prepare license_check format analyze test coverage
+.PHONY: container-cicd
 
 cicd_macos: prepare test
 .PHONY: cicd_macos
@@ -114,37 +119,7 @@ license_check:
 license_add:
 	cat $(ADDLICENSE_CONFIG) | xargs addlicense
 
-doc:
-	dart doc --output=$(DOC_DIR) --validate-links .
-.PHONY: doc
 
-# BEGIN: Documentation site tasks
-site/:
-	mkdir -p site
-
-site: styles site/index.html site/spec.html site/roadmap.html site/api/index.html coverage | site/
-.PHONY: site
-
-styles: site/styles/styles.css
-.PHONY: styles
-
-site/index.html:  docs/index.md README.md docs/.pandoc docs/template/header.html | site/
-	pandoc --defaults="docs/.pandoc" docs/index.md README.md -o "site/index.html";
-
-site/spec.html:  docs/spec/*.md docs/spec/.pandoc docs/template/header.html | site/
-	pandoc --defaults="docs/spec/.pandoc" --mathml docs/spec/*.md -o "site/spec.html";
-
-site/roadmap.html: docs/roadmap/*.md docs/.pandoc docs/template/header.html | site/
-	pandoc --defaults="docs/.pandoc" docs/roadmap/v*.md -o "site/roadmap.html";
-
-site/styles/styles.css: docs/styles/styles.css | site/
-	mkdir -p site/styles/
-	cp docs/styles/styles.css site/styles/styles.css
-
-site/api/index.html:
-	dart doc -o site/api/index.html
-
-# END: Documentation site tasks
 
 
 

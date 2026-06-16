@@ -15,7 +15,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import 'package:betto_zstd/zstd.dart';
+import 'package:betto_zstd/betto_zstd.dart';
 
 void main() {
   group('ZstdSimple', () {

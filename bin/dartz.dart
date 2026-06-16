@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import 'dart:io';
-import 'package:betto_zstd/zstd.dart';
+import 'package:betto_zstd/betto_zstd.dart';
 
 /// A command-line tool for Zstd compression and decompression.
 ///

@@ -33,7 +33,7 @@
 import 'dart:io' show File;
 import 'dart:typed_data';
 
-import 'package:betto_zstd/zstd.dart';
+import 'package:betto_zstd/betto_zstd.dart';
 import 'package:test/test.dart';
 
 // Fixed payload used for all cross-platform checks — short, deterministic.

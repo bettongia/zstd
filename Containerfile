@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3 \
     xz-utils \
+    pandoc \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Emscripten SDK at the pinned version (EMSCRIPTEN_VERSION file at repo root)
@@ -39,4 +40,4 @@ WORKDIR /home/runner/app
 
 COPY --chown=runner:runner . .
 
-CMD ["make", "cicd"]
+CMD ["make", "container-cicd"]

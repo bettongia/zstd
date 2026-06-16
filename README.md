@@ -19,9 +19,13 @@ Add `betto_zstd` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  betto_zstd:
-    git:
-      url: https://github.com/bettongia/zstd.git
+  betto_zstd: ^0.1.0
+```
+
+Or run:
+
+```sh
+dart pub add betto_zstd
 ```
 
 **Native platforms** require a C compiler available at build time (e.g. `clang`
@@ -39,7 +43,7 @@ before first use (see usage below).
 
 ```dart
 import 'dart:typed_data';
-import 'package:betto_zstd/zstd.dart';
+import 'package:betto_zstd/betto_zstd.dart';
 
 void main() async {
   await ZstdSimple.init(); // no-op on native; safe to always call
@@ -59,7 +63,7 @@ Call `ZstdSimple.init()` once during app startup — for example in `main()` —
 before creating any `ZstdSimple` instance:
 
 ```dart
-import 'package:betto_zstd/zstd.dart';
+import 'package:betto_zstd/betto_zstd.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {

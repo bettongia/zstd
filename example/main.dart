@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import 'dart:typed_data';
-import 'package:betto_zstd/zstd.dart';
+import 'package:betto_zstd/betto_zstd.dart';
 
-void main() {
+Future<void> main() async {
+  await ZstdSimple.init(); // no-op on native; required on web before first use
+
   // Create a ZstdSimple instance with a specific compression level (default is 3)
   final zstd = ZstdSimple(level: 3);
 

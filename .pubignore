@@ -16,3 +16,7 @@ coverage/
 
 # Development tooling config.
 cspell.json
+
+third_party/
+header_template.txt
+addlicense_config.txt
