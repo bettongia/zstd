@@ -1,12 +1,11 @@
 ---
-title: betto_zstd — Technical Specification
+title: Technical Specification
+subtitle: betto_zstd
 toc-title: "Contents"
 ...
 
-# betto_zstd — Technical Specification
-
 - **Package:** `betto_zstd`
-- **Version:** 0.1.0-dev.1
+- **Version:** 0.1.0
 - **Dart SDK:** ^3.12.0
 - **Upstream C library:** Zstandard v1.5.7
 
@@ -34,13 +33,13 @@ dependency; the Dart library itself uses only Dart SDK libraries.
 
 # Design Constraints
 
-| Constraint                             | Rationale                                                                                                                                  |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| No Flutter SDK dependency in Dart code | KMDB's core layer is pure Dart; importing Flutter here would force Flutter into every host                                                 |
-| Same C source on all platforms         | Frame-format compatibility between native and web is guaranteed by construction — both compile the identical `third_party/zstd/src/zstd.c` |
-| Dynamic linking only (native)          | `dart build` CLI bundles the resulting shared library in the output bundle's `lib/` directory; no pre-built binaries checked in            |
-| WASM checked in                        | The WASM binary (`lib/assets/zstd.wasm`) is committed so the web path works without Emscripten installed                                   |
-| Version pinning enforced at build time | `hook/build.dart` compares `VERSION_ZSTD` against the version macros in `third_party/zstd/zstd.h` and fails the build on a mismatch        |
+| Constraint                             | Rationale                                                                                                                                                                                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No Flutter SDK dependency in Dart code | KMDB's core layer is pure Dart; importing Flutter here would force Flutter into every host                                                                                                                                                                    |
+| Same C source on all platforms         | Frame-format compatibility between native and web is guaranteed by construction — both compile the identical `third_party/zstd/src/zstd.c`                                                                                                                    |
+| Dynamic linking only (native)          | `dart build` CLI bundles the resulting shared library in the output bundle's `lib/` directory; no pre-built binaries checked in                                                                                                                               |
+| WASM checked in                        | The WASM binary (`lib/assets/zstd.wasm`) is committed so the web path works without Emscripten installed                                                                                                                                                      |
+| Version pinning enforced at build time | `hook/build.dart` compares `VERSION_ZSTD` against the version macros in `third_party/zstd/zstd.h` and fails the build on a mismatch                                                                                                                           |
 | WASM currency enforced in CI           | The `verify-wasm` CI job rebuilds `lib/assets/zstd.wasm` under the Emscripten version pinned in `EMSCRIPTEN_VERSION` and asserts the result is bit-for-bit identical to the committed binary, preventing the web path from drifting from the current C source |
 
 ---
@@ -116,8 +115,8 @@ class ZstdSimple {
 **`init()`** must be awaited once before any use on the web platform (it loads
 the WASM module). On native platforms it is a synchronous no-op, but callers
 should always await it so the same call site works on all platforms. The
-optional `wasmUrl` parameter is web-only; it overrides the default Flutter
-asset path and is not available on native or unsupported-platform builds.
+optional `wasmUrl` parameter is web-only; it overrides the default Flutter asset
+path and is not available on native or unsupported-platform builds.
 
 **`compress()`** allocates the output buffer using `ZSTD_compressBound`,
 performs a single-shot compression, and returns the compressed bytes trimmed to
@@ -130,9 +129,9 @@ size is unknown (streaming frames are not supported).
 
 ## `ZstdException`
 
-Thrown by `compress` and `decompress` when the Zstd library reports an error
-or the frame header is invalid. Implements `Exception`, so it is caught by
-both `on ZstdException` and `on Exception` clauses.
+Thrown by `compress` and `decompress` when the Zstd library reports an error or
+the frame header is invalid. Implements `Exception`, so it is caught by both
+`on ZstdException` and `on Exception` clauses.
 
 ```dart
 class ZstdException implements Exception {
@@ -397,8 +396,8 @@ device/emulator:
 - Compression level bounds (`minCLevel()` < 0, `maxCLevel()` > 0).
 
 These tests are run locally via `make android_test` (connected Android
-emulator/device) and `make ios_test` (connected iOS simulator/device).
-Automated CI coverage for iOS and Android is deferred to a post-0.1.0 release.
+emulator/device) and `make ios_test` (connected iOS simulator/device). Automated
+CI coverage for iOS and Android is deferred to a post-0.1.0 release.
 
 ## Running Tests
 
@@ -423,13 +422,13 @@ The Makefile is the primary interface for running tests. Do not invoke
 
 The pipeline runs on every push and pull request to `main`.
 
-| Job            | Runner           | Trigger                       | Steps                                                                                                         |
-| -------------- | ---------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `build`        | `ubuntu-latest`  | always                        | `make cicd` — license check, format, analyze, unit tests, coverage                                            |
-| `test-macos`   | `macos-latest`   | after `build`                 | `make cicd_macos` — native unit tests on Apple Silicon/x86_64                                                 |
-| `test-windows` | `windows-latest` | after `build`                 | `make cicd_windows` — native unit tests via MSVC                                                              |
+| Job            | Runner           | Trigger                       | Steps                                                                                                           |
+| -------------- | ---------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `build`        | `ubuntu-latest`  | always                        | `make cicd` — license check, format, analyze, unit tests, coverage                                              |
+| `test-macos`   | `macos-latest`   | after `build`                 | `make cicd_macos` — native unit tests on Apple Silicon/x86_64                                                   |
+| `test-windows` | `windows-latest` | after `build`                 | `make cicd_windows` — native unit tests via MSVC                                                                |
 | `verify-wasm`  | `ubuntu-latest`  | after `build`                 | Rebuilds `lib/assets/zstd.wasm` under the pinned Emscripten version and asserts `git diff --exit-code` is clean |
-| `test-web`     | `ubuntu-latest`  | after `build` + `verify-wasm` | `make web_test` — WASM tests on Chrome; only runs after the binary is proven current                          |
+| `test-web`     | `ubuntu-latest`  | after `build` + `verify-wasm` | `make web_test` — WASM tests on Chrome; only runs after the binary is proven current                            |
 
 Coverage is uploaded as an artifact (`coverage/lcov.info`) from the `build` job.
 
