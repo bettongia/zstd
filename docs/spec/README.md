@@ -230,6 +230,16 @@ The Native Assets build hook is invoked automatically during `dart build`,
    table and the FFI resolver throws error 127 at runtime).
 4. Routes the output library to the app bundle via `ToAppBundle()`.
 
+**No iOS companion plugin.** `native_toolchain_c` cross-compiles `zstd.c` for
+iOS and Android as part of this hook, so no companion Flutter plugin is needed.
+This contrasts with packages such as `betto_onnxrt`, which depend on a
+pre-built XCFramework that cannot be compiled from source via the native assets
+toolchain — those packages require an SPM companion plugin (e.g.
+`betto_onnxrt_ios`) to deliver the binary and use `DynamicLibrary.process()` to
+resolve symbols already linked into the host process. Because zstd is a vendored
+C source file, the toolchain builds and registers it on every native target
+without any additional plugin machinery.
+
 ---
 
 # Web Platform Implementation
